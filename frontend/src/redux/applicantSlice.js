@@ -10,9 +10,12 @@ const applicantSlice= createSlice({
         setAllApplicant : (state,action)=>{
             state.allApplicant= action.payload
         },
+        clearApplicantState:(state)=>{
+            state.allApplicant=[]
+        }
 
     }
 
 })
-export const {setAllApplicant} = applicantSlice.actions
+export const {setAllApplicant,clearApplicantState} = applicantSlice.actions
 export default applicantSlice.reducer

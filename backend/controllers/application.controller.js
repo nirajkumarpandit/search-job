@@ -69,7 +69,8 @@ export const getAllApplied=async(req,res)=>{
 
 export const getApplicant=async(req,res)=>{
     const jobId=req.params.id
-    const job = await Job.findById(jobId).populate({
+    const userId=req.id
+    const job = await Job.findOne({_id:jobId,createdBy:userId}).populate({
         path:"applications",
         options:{sort:{createdAt:-1}},
         populate:{

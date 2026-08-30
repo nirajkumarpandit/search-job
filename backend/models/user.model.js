@@ -29,7 +29,7 @@ const userSchema=mongoose.Schema({
         resumeOriginalName:{type:String},
         company:{  // ye company schema se aayega 
             type:mongoose.Schema.Types.ObjectId,
-            ref:"Compnay"
+            ref:"Company"
         },
         profilePhoto:{
             type:String,

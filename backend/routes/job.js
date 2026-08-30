@@ -9,7 +9,7 @@ router.route("/postJob").post(isAuthenticate,isRecruiter,wrapAsync(postJob))
 router.route("/get").get(wrapAsync(getAllJob))
 router.route("/get/:id").get(isAuthenticate,wrapAsync(getJobById))
 router.route("/getAdminJobs").get(isAuthenticate,isRecruiter,wrapAsync(getAdminJob))
-router.route("/delete/:id").get(isAuthenticate,isRecruiter,wrapAsync(deleteJob))
+router.route("/delete/:id").delete(isAuthenticate,isRecruiter,wrapAsync(deleteJob))
 
 
 export default router

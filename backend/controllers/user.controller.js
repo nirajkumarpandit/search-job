@@ -15,9 +15,6 @@ export const register = async (req, res) => {
                 success: false
             })
         }
-        const file = req.file
-        const fileUri = getDataUri(file)
-        const cloudResopnse = await cloudinary.uploader.upload(fileUri.content)
         const user = await User.findOne({ email });
         if (user) {
             return res.status(400).json({
@@ -25,8 +22,13 @@ export const register = async (req, res) => {
                 success: false
             })
         }
+        let profilePhoto = ""
+        if (req.file) {
+            const fileUri = getDataUri(req.file)
+            const cloudResopnse = await cloudinary.uploader.upload(fileUri.content)
+            profilePhoto = cloudResopnse.secure_url
+        }
         // password ko hast form me convert
-
         const hashPassword = await bcrypt.hash(password, 10)
         // user create
         await User.create({
@@ -36,7 +38,7 @@ export const register = async (req, res) => {
             role,
             phoneNumber,
             profile: {
-                profilePhoto: cloudResopnse.secure_url
+                profilePhoto: profilePhoto
             }
         })
         return res.status(201).json({
@@ -100,8 +102,10 @@ export const login = async (req, res) => {
         role: user.role
 
     }
-    return res.status(200).cookie("token", token, { maxAge: 1 * 24 * 60 * 60 * 1000, httpOnly: true, secure: true,
-    sameSite: "none"}).json({
+    return res.status(200).cookie("token", token, {
+        maxAge: 1 * 24 * 60 * 60 * 1000, httpOnly: true, secure: true,
+        sameSite: "none"
+    }).json({
         message: `Welcome back ${user.username}`,
         user,
         success: true
@@ -110,19 +114,24 @@ export const login = async (req, res) => {
 // logout
 
 export const logout = async (req, res) => {
-    return res.status(200).cookie("token", "", { maxAge: 0 }).json({ // cookies ko empty kar do or usi time cookies ko expire kar do
-        message: "Logged out successfully",
-        success: true
-    })
-}
+    return res
+        .status(200)
+        .cookie("token", "", {
+            maxAge: 0,
+            httpOnly: true,
+            secure: true,
+            sameSite: "none"
+        })
+        .json({
+            message: "Logged out successfully",
+            success: true
+        });
+};
 
 // update 
 export const updateProfile = async (req, res) => {
     const { username, email, phoneNumber, skills, bio } = req.body
-    // cloudnary implement
     const file = req.file
-    const fileUri = getDataUri(file)
-    const cloudResopnse = await cloudinary.uploader.upload(fileUri.content);
     let skillsArray;
     if (skills) {
         skillsArray = skills.split(",")
@@ -137,17 +146,18 @@ export const updateProfile = async (req, res) => {
         })
     }
     // update the value
+    if (req.file) {
+        // cloudnary implement
+        const fileUri = getDataUri(file)
+        const cloudResopnse = await cloudinary.uploader.upload(fileUri.content);
+        user.profile.resume = cloudResopnse.secure_url // save the cloudinary url
+        user.profile.resumeOriginalName = file.originalname //save the original file name
+    }
     if (username) user.username = username
     if (email) user.email = email
     if (phoneNumber) user.phoneNumber = phoneNumber
     if (bio) user.profile.bio = bio
     if (skills) user.profile.skills = skillsArray
-
-    if (cloudResopnse) {
-        user.profile.resume = cloudResopnse.secure_url // save the cloudinary url
-        user.profile.resumeOriginalName = file.originalname //save the original file name
-
-    }
     await user.save();
     const updatedUser = await User.findById(userId);
 

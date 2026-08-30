@@ -11,7 +11,7 @@ const isAuthenticate= async (req,res,next)=>{
     }
     const decode=jwt.verify(token,process.env.SECRET_KEY);
     if(!decode){
-        res.status(401).json({
+       return res.status(401).json({
             message:"invaled token",
             success:false
         })
@@ -20,6 +20,10 @@ const isAuthenticate= async (req,res,next)=>{
     next()
     } catch (e) {
         console.log(e)
+         return res.status(401).json({
+            message:"Invalid or expired token",
+            success:false
+        })
     }
 }
 export default isAuthenticate

@@ -18,6 +18,9 @@ import axios from 'axios'
 import { USER_API_END_POINT } from '@/utils/constant'
 import { setUser } from '@/redux/authSlice'
 import { toast } from 'sonner'
+import { clearJobState } from '@/redux/jobSlice'
+import { clearApplicantState } from '@/redux/applicantSlice'
+import { clearCompanyState } from '@/redux/companySlice'
 
 const Navbar = () => {
     const { user } = useSelector(store => store.auth)
@@ -31,6 +34,9 @@ const Navbar = () => {
             const res = await axios.post(`${USER_API_END_POINT}/logout`, { withCredentials: true })
             if (res.data.success) {
                 dispatch(setUser(null))
+                dispatch(clearJobState())
+                dispatch(clearApplicantState())
+                dispatch(clearCompanyState())
                 navigate('/')
                 toast.success(res.data.message)
             }
