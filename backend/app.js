@@ -39,7 +39,7 @@ app.use((err , req, res, next)=>{
     })
 })
 connectDB();
-app.listen(PORT,()=>{
-    console.log(`server listining on 8000`)
-})
+// app.listen(PORT,()=>{
+//     console.log(`server listining on 8000`)
+// })
 export default app;
