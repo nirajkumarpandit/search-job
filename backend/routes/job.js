@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.route("/postJob").post(isAuthenticate,isRecruiter,wrapAsync(postJob))
 router.route("/get").get(wrapAsync(getAllJob))
-router.route("/get/:id").get(isAuthenticate,wrapAsync(getJobById))
+router.route("/get/:id").get(wrapAsync(getJobById))
 router.route("/getAdminJobs").get(isAuthenticate,isRecruiter,wrapAsync(getAdminJob))
 router.route("/delete/:id").delete(isAuthenticate,isRecruiter,wrapAsync(deleteJob))
 

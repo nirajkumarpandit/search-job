@@ -1,5 +1,4 @@
 import { setAllJobs } from '@/redux/jobSlice'
-import store from '@/redux/store'
 import { JOB_API_END_POINT } from '@/utils/constant'
 import axios from 'axios'
 import { useEffect } from 'react'

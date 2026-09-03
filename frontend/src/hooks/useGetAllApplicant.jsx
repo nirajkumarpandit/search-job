@@ -1,6 +1,5 @@
 
 import { setAllApplicant } from '@/redux/applicantSlice'
-import { setAdminJobs } from '@/redux/jobSlice'
 import { APPLICATION_API_END_POINT } from '@/utils/constant'
 import axios from 'axios'
 import React, { useEffect } from 'react'
