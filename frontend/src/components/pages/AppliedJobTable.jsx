@@ -12,6 +12,7 @@ const statusStyles = {
 
 const AppliedJobTable = () => {
   const { appliedJobs } = useSelector(store => store.job)
+  console.log(appliedJobs)
   return (
     <div>
       <h1 className='font-bold text-lg text-gray-900 mb-4'>Applied Jobs</h1>
@@ -40,8 +41,8 @@ const AppliedJobTable = () => {
                 appliedJobs.map((job) => (
                   <TableRow key={job._id}>
                     <TableCell className="text-gray-500">{job?.createdAt?.split("T")[0]}</TableCell>
-                    <TableCell className="font-medium text-gray-800">{job?.job[0]?.title}</TableCell>
-                    <TableCell className="text-gray-600">{job?.job[0]?.company?.companyName}</TableCell>
+                    <TableCell className="font-medium text-gray-800">{job?.job?.title}</TableCell>
+                    <TableCell className="text-gray-600">{job?.job?.company?.companyName}</TableCell>
                     <TableCell className={"text-right"}>
                       <Badge className={`rounded-full px-3 capitalize ${statusStyles[job?.status] || ""}`}>
                         {job?.status}

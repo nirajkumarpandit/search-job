@@ -23,7 +23,11 @@ const JobDescription = () => {
 
     const applyJobHandler = async () => {
         try {
-            const res = await axios.post(`${APPLICATION_API_END_POINT}/apply/${jobId}`, { withCredentials: true })
+            const res = await axios.post(
+                `${APPLICATION_API_END_POINT}/apply/${jobId}`,
+                {}, // Empty Body (2nd Parameter)
+                { withCredentials: true } // Config / Options (3rd Parameter)
+            )
             if (res.data.success) {
                 setIsApplied(true)
                 const updateSingleJob = {
@@ -54,7 +58,7 @@ const JobDescription = () => {
         if (jobId) {
             fetchSingleJob()
         }
-    }, [jobId])
+    }, [jobId,user?._id,dispatch])
 
     const infoItems = [
         { icon: Users, label: 'Positions', value: `${singleJob?.position ?? '-'} openings` },

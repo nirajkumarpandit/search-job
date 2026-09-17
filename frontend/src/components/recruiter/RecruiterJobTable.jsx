@@ -15,14 +15,16 @@ import {
 } from '../ui/popover'
 import { Eye, MoreHorizontal, Briefcase } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { FaTrash } from 'react-icons/fa'
 import { toast } from 'sonner'
 import axios from 'axios'
 import { JOB_API_END_POINT } from '@/utils/constant'
+import { setAdminJobs } from '@/redux/jobSlice'
 
 const RecruiterJobTable = () => {
     const navigate = useNavigate()
+    const dispatch=useDispatch()
 
     const { searchJobByText, allAdminJobs } = useSelector(
         (store) => store.job
@@ -51,9 +53,12 @@ const RecruiterJobTable = () => {
 
     const jobDeleteHandler = async (id) => {
         try {
-            const res = await axios.get(`${JOB_API_END_POINT}/delete/${id}`, { withCredentials: true })
+            const res = await axios.delete(`${JOB_API_END_POINT}/delete/${id}`, { withCredentials: true })
             if (res.data.success) {
                 toast.success(res.data.message)
+                // Redux state update karein taaki UI bina page reload kiye rerender ho jaye
+            const updatedJobs = allAdminJobs.filter((job) => job._id !== id)
+            dispatch(setAdminJobs(updatedJobs))
             }
         } catch (error) {
             console.log(error)

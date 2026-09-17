@@ -42,8 +42,12 @@ export const postJob = async (req, res) => {
 // admin update karega
 export const updateJob = async (req, res) => {
     let { title, description, salary, requirement, location, jobType } = req.body
+    const jobId=req.params.id
     const userId = req.id
-    let job = await Job.findOne({ userId })
+    let job = await Job.findOne({ 
+        _id:jobId,
+        createdBy:userId
+     })
     if (!job) {
         return res.status(404).json({
             message: "job not found",
@@ -97,7 +101,9 @@ export const getAllJob = async (req, res) => {
 export const getJobById = async (req, res) => {
     const jobId = req.params.id
     const job = await Job.findById(jobId).populate({
-        path: "company"
+        path: "applications"
+    }).populate({
+        path:"company"
     })
     if (!job) {
         return res.status(404).json({
