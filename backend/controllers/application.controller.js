@@ -52,7 +52,6 @@ export const getAllApplied=async(req,res)=>{
             options:{sort:{createdAt:-1}}
         }
     })
-    console.log(application)
     if(!application){
         return res.status(404).json({
             message:"application not found",

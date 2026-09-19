@@ -7,6 +7,7 @@ import userRouter from "./routes/user.js"
 import companyRouter from "./routes/company.js"
 import jobRouter from "./routes/job.js"
 import applicationRouter from "./routes/application.js"
+import resumeRouter from "./routes/resume.js"
 dotenv.config({})
 
 const app=express()
@@ -26,6 +27,7 @@ app.use("/api/user",userRouter)
 app.use("/api/company",companyRouter)
 app.use("/api/job",jobRouter)
 app.use("/api/application",applicationRouter)
+app.use("/api/resume",resumeRouter)
 app.get('/',(req,res)=>{
     res.send("api working")
 })

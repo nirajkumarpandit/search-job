@@ -3,7 +3,6 @@ import bcrypt from 'bcryptjs'
 import jwt from "jsonwebtoken"
 import getDataUri from '../utils/datauri.js'
 import cloudinary from '../utils/cludnary.js'
-import { profile } from 'console'
 
 // register user
 export const register = async (req, res) => {
