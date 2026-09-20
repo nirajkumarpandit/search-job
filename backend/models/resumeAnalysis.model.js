@@ -8,7 +8,10 @@ const resumeAnalysisSchema = new mongoose.Schema(
       required: true,
       unique: true
     },
-
+    resumeUrl: {
+      type: String,
+      required: true
+    },
     resumeScore: {
       type: Number,
       min: 0,

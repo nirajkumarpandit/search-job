@@ -12,7 +12,6 @@ const statusStyles = {
 
 const AppliedJobTable = () => {
   const { appliedJobs } = useSelector(store => store.job)
-  console.log(appliedJobs)
   return (
     <div>
       <h1 className='font-bold text-lg text-gray-900 mb-4'>Applied Jobs</h1>

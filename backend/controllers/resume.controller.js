@@ -18,8 +18,17 @@ const analyzeResumeController = async (req, res) => {
         if (!resumeUrl) {
             return res.status(400).json({
                 success: false,
-                message: "Resume URL is required"
+                message: "Please upload a resume first"
             });
+        }
+        // check existing analysis
+        const existAnalysis = await ResumeAnalysis.findOne({ userId })
+        if (existAnalysis && existAnalysis.resumeUrl === resumeUrl) {
+            return res.status(200).json({
+                success: true,
+                message: "Existing analysis found",
+                analysis: existAnalysis
+            })
         }
 
         const analysis = await analyzeResume(resumeUrl);
@@ -44,7 +53,17 @@ const analyzeResumeController = async (req, res) => {
 
     } catch (error) {
         console.error("Resume Analysis Error:", error);
-
+        // agar limit gemini ka limit reach ho jata hai hai to ye error aayega
+        if (
+            error.status === 429 ||
+            error.message?.includes("Rate limit") ||
+            error.message?.includes("quota")
+        ) {
+            return res.status(429).json({
+                success: false,
+                message: "AI analysis limit reached."
+            });
+        }
         return res.status(500).json({
             success: false,
             message: error.message

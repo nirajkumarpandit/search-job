@@ -1,20 +1,44 @@
 import React, { useState } from 'react'
 import Navbar from '../shared/Navbar'
 import { Avatar, AvatarImage, AvatarFallback } from '../ui/avatar'
-import { Contact2, Mail, Pen, FileText, Award } from 'lucide-react'
+import { Contact2, Mail, Pen, FileText, Award, Loader2 } from 'lucide-react'
 import { Badge } from '../ui/badge'
 import AppliedJobTable from './AppliedJobTable'
 import Footer from '../shared/Footer'
 import { Button } from '../ui/button'
 import UpdateProfile from './UpdateProfile'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import useGetAppliedJobs from '@/hooks/useGetAppliedJobs'
+import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
+import { RESUME_ANALYZER_API_END_POINT } from '@/utils/constant'
+import { setAnalysis } from '@/redux/resumeAnalyzerSlice'
+import { setLoading } from '@/redux/authSlice'
+import { toast } from 'sonner'
 
 const Profile = () => {
   let isResume = true
   const [open, setOpen] = useState(false)
   useGetAppliedJobs()
-  const { user } = useSelector(store => store.auth)
+  const { user, loading } = useSelector(store => store.auth)
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const resumeAnalyzerHandler = async () => {
+    try {
+      dispatch(setLoading(true))
+      const res = await axios.post(`${RESUME_ANALYZER_API_END_POINT}/analyze`, {}, { withCredentials: true })
+      if (res?.data?.success) {
+        dispatch(setAnalysis(res.data.analysis))
+        toast.success(res.data.message)
+        navigate("/resume-analyzer")
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message)
+      console.log(error)
+    } finally {
+      dispatch(setLoading(false))
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50/60 flex flex-col">
@@ -69,7 +93,7 @@ const Profile = () => {
               </div>
             </div>
 
-            <div className='mt-6'>
+            <div className='mt-6 flex  justify-center gap-3 flex-col'>
               <h2 className='font-semibold text-sm text-gray-800 flex items-center gap-2 mb-2'>
                 <FileText className="h-4 w-4 text-violet-600" /> Resume
               </h2>
@@ -78,6 +102,22 @@ const Profile = () => {
                   ? <a target='_blank' rel="noreferrer" href={user?.profile?.resume} className='text-sm text-violet-700 font-medium hover:underline break-all'>{user?.profile?.resumeOriginalName}</a>
                   : <span className="text-sm text-gray-400">Resume not uploaded</span>
               }
+              <div className="">
+                <Button
+                  disabled={!user?.profile?.resume || loading}
+                  className=" bg-violet-600 hover:bg-violet-700 cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={resumeAnalyzerHandler}
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Analyzing Resume...    
+                    </>
+                  ) : (
+                    <>✨ Analyze Resume</>
+                  )}
+                </Button>
+              </div>
             </div>
           </div>
         </div>

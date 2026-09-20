@@ -13,17 +13,18 @@ import {
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Button } from '../ui/button'
 import { useDispatch, useSelector } from 'react-redux'
-import { LogOut, User2Icon, Menu, X, Briefcase } from 'lucide-react'
+import { LogOut, User2Icon, Menu, X, Briefcase, Loader2 } from 'lucide-react'
 import axios from 'axios'
-import { USER_API_END_POINT } from '@/utils/constant'
-import { setUser } from '@/redux/authSlice'
+import { RESUME_ANALYZER_API_END_POINT, USER_API_END_POINT } from '@/utils/constant'
+import { setLoading, setUser } from '@/redux/authSlice'
 import { toast } from 'sonner'
 import { clearJobState } from '@/redux/jobSlice'
 import { clearApplicantState } from '@/redux/applicantSlice'
 import { clearCompanyState } from '@/redux/companySlice'
+import { setAnalysis } from '@/redux/resumeAnalyzerSlice'
 
 const Navbar = () => {
-    const { user } = useSelector(store => store.auth)
+    const { user, loading } = useSelector(store => store.auth)
     const dispatch = useDispatch()
     const navigate = useNavigate()
     const location = useLocation()
@@ -59,6 +60,22 @@ const Navbar = () => {
         ]
 
     const isActive = (path) => location.pathname === path
+    const resumeAnalyzerHandler = async () => {
+        try {
+            dispatch(setLoading(true))
+            const res = await axios.post(`${RESUME_ANALYZER_API_END_POINT}/analyze`, {}, { withCredentials: true })
+            if (res?.data?.success) {
+                dispatch(setAnalysis(res.data.analysis))
+                toast.success(res.data.message)
+                navigate("/resume-analyzer")
+            }
+        } catch (error) {
+            toast.error(error.response?.data?.message)
+            console.log(error)
+        } finally {
+            dispatch(setLoading(false))
+        }
+    }
 
     return (
         <div className='sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100'>
@@ -71,73 +88,101 @@ const Navbar = () => {
                 </Link>
 
                 {/* Desktop nav */}
-                <div className='hidden md:flex gap-8 items-center'>
-                    <ul className='flex items-center gap-6 font-medium text-sm text-gray-600'>
-                        {navLinks.map(link => (
-                            <li key={link.to}>
-                                <Link
-                                    to={link.to}
-                                    className={`relative py-1 transition-colors hover:text-violet-600 ${isActive(link.to) ? 'text-violet-600' : ''}`}
-                                >
-                                    {link.label}
-                                    {isActive(link.to) && (
-                                        <span className="absolute left-0 -bottom-1 h-0.5 w-full rounded-full bg-violet-600" />
-                                    )}
-                                </Link>
-                            </li>
-                        ))}
-                    </ul>
-                    {
-                        !user ? (
-                            <div className='flex gap-3'>
-                                <Link to="/login"><Button className={"cursor-pointer"} variant='outline'>Login</Button></Link>
-                                <Link to="/signup"><Button className="cursor-pointer bg-violet-600 hover:bg-violet-700 shadow-sm shadow-violet-200">Sign up</Button></Link>
-                            </div>
-                        ) : (
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <Avatar className="cursor-pointer ring-2 ring-transparent hover:ring-violet-200 transition-all">
-                                        <AvatarImage src={user?.profile?.profilePhoto} />
-                                        <AvatarFallback className="bg-violet-100 text-violet-700 font-semibold">
-                                            {user?.username?.[0]?.toUpperCase()}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-72 p-0 overflow-hidden">
-                                    <div className="flex gap-3 p-4 bg-gray-50/70 border-b border-gray-100">
-                                        <Avatar>
-                                            <AvatarImage src={user?.profile?.profilePhoto} />
-                                            <AvatarFallback className="bg-violet-100 text-violet-700 font-semibold">
-                                                {user?.username?.[0]?.toUpperCase()}
-                                            </AvatarFallback>
-                                        </Avatar>
-                                        <div className="min-w-0">
-                                            <h1 className='font-semibold text-sm truncate'>{user?.username}</h1>
-                                            <p className='text-xs text-gray-500 truncate'>{user?.profile?.bio || user?.email}</p>
-                                        </div>
-                                    </div>
-                                    <div className="p-2">
-                                        {
-                                            user && user.role === 'student' && (
-                                                <Link
-                                                    to="/profile"
-                                                    className='flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-violet-50 hover:text-violet-700 transition-colors'
-                                                >
-                                                    <User2Icon className="h-4 w-4" /> View Profile
-                                                </Link>
-                                            )
-                                        }
-                                        <button
-                                            onClick={logoutHandler}
-                                            className='w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors cursor-pointer'
+                <div className='hidden md:flex gap-8 items-center '>
+                    <div className="">
+                        <ul className='flex items-center gap-6 font-medium text-sm text-gray-600'>
+                            {navLinks.map(link => (
+                                <li key={link.to}>
+                                    <Link
+                                        to={link.to}
+                                        className={`relative py-1 transition-colors hover:text-violet-600 ${isActive(link.to) ? 'text-violet-600' : ''}`}
+                                    >
+                                        {link.label}
+                                        {isActive(link.to) && (
+                                            <span className="absolute left-0 -bottom-1 h-0.5 w-full rounded-full bg-violet-600" />
+                                        )}
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                    <div className="flex items-center gap-5">
+                        <div className="">
+                            {
+                                user ? (
+                                    <div className="">
+                                        <Button
+                                            disabled={!user?.profile?.resume || loading}
+                                            className=" bg-violet-600 hover:bg-violet-700 cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                            onClick={resumeAnalyzerHandler}
                                         >
-                                            <LogOut className="h-4 w-4" /> Logout
-                                        </button>
+                                            {loading ? (
+                                                <>
+                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                    Analyzing Resume...
+                                                </>
+                                            ) : (
+                                                <>✨ Analyze Resume</>
+                                            )}
+                                        </Button>
                                     </div>
-                                </PopoverContent>
-                            </Popover>
-                        )
-                    }
+                                ) : (<></>)
+                            }
+                        </div>
+                        <div className="">
+                            {
+                                !user ? (
+                                    <div className='flex gap-3'>
+                                        <Link to="/login"><Button className={"cursor-pointer"} variant='outline'>Login</Button></Link>
+                                        <Link to="/signup"><Button className="cursor-pointer bg-violet-600 hover:bg-violet-700 shadow-sm shadow-violet-200">Sign up</Button></Link>
+                                    </div>
+                                ) : (
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Avatar className="cursor-pointer ring-2 ring-transparent hover:ring-violet-200 transition-all">
+                                                <AvatarImage src={user?.profile?.profilePhoto} />
+                                                <AvatarFallback className="bg-violet-100 text-violet-700 font-semibold">
+                                                    {user?.username?.[0]?.toUpperCase()}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-72 p-0 overflow-hidden">
+                                            <div className="flex gap-3 p-4 bg-gray-50/70 border-b border-gray-100">
+                                                <Avatar>
+                                                    <AvatarImage src={user?.profile?.profilePhoto} />
+                                                    <AvatarFallback className="bg-violet-100 text-violet-700 font-semibold">
+                                                        {user?.username?.[0]?.toUpperCase()}
+                                                    </AvatarFallback>
+                                                </Avatar>
+                                                <div className="min-w-0">
+                                                    <h1 className='font-semibold text-sm truncate'>{user?.username}</h1>
+                                                    <p className='text-xs text-gray-500 truncate'>{user?.profile?.bio || user?.email}</p>
+                                                </div>
+                                            </div>
+                                            <div className="p-2">
+                                                {
+                                                    user && user.role === 'student' && (
+                                                        <Link
+                                                            to="/profile"
+                                                            className='flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-violet-50 hover:text-violet-700 transition-colors'
+                                                        >
+                                                            <User2Icon className="h-4 w-4" /> View Profile
+                                                        </Link>
+                                                    )
+                                                }
+                                                <button
+                                                    onClick={logoutHandler}
+                                                    className='w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors cursor-pointer'
+                                                >
+                                                    <LogOut className="h-4 w-4" /> Logout
+                                                </button>
+                                            </div>
+                                        </PopoverContent>
+                                    </Popover>
+                                )
+                            }
+                        </div>
+                    </div>
                 </div>
 
                 {/* Mobile menu button */}

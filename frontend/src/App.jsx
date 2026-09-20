@@ -14,6 +14,7 @@ import RecruiterJobs from "./components/recruiter/RecruiterJobs"
 import JobPost from "./components/recruiter/JobPost"
 import Applicant from "./components/recruiter/Applicant"
 import ProtectedRoute from "./components/recruiter/ProtectedRoute"
+import Resume from "./components/pages/resume-analyzer_Page/Resume"
 
 const appRouter= createBrowserRouter([
   {
@@ -42,6 +43,10 @@ const appRouter= createBrowserRouter([
   },{
     path:"/profile",
     element:<Profile/>
+  },
+  {
+    path:"/resume-analyzer",
+    element:<Resume/>
   },
   // recruiter ka route
   {
